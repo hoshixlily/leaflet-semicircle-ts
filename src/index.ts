@@ -1,1 +1,1 @@
-export { Semicircle } from "./Semicircle";
+export { Semicircle, SemicircleOptions } from "./Semicircle";

@@ -3,7 +3,13 @@
     "version": "1.0.0",
     "description": "Typescript port of the semicircle extension for Leaflet library originally written by @jieter.",
     "main": "dist/index.ts",
-    "source": "src/index.ts",
+    "module": "dist/index.esm.js",
+    "types": "dist/index.d.ts",
+    "umd:main": "dist/index.umd.js",
+    "private": false,
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "build:watch": "microbundle watch",
         "build": "microbundle",

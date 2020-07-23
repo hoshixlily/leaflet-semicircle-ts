@@ -43,12 +43,12 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - uses: actions/download-artifact@v2
         with:
-          name: dist
-          path: dist
+          name: .
+          path: .
       - name: List files
         run: ls -R
         working-directory: dist
       - name: Publish to NPM
-        run: npm publish ./dist --access public
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NODE_SECRET_KEY}}
