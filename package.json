@@ -1,0 +1,35 @@
+{
+    "name": "@discordelia/leaflet-semicircle-ts",
+    "version": "1.0.0",
+    "description": "Typescript port of the semicircle extension for Leaflet library originally written by @jieter.",
+    "main": "dist/index.ts",
+    "source": "src/index.ts",
+    "scripts": {
+        "build:watch": "microbundle watch",
+        "build": "microbundle",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/discordelia/leaflet-semicircle-ts.git"
+    },
+    "keywords": [
+        "leaflet",
+        "semicircle",
+        "typescript"
+    ],
+    "author": "discordelia",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/discordelia/leaflet-semicircle-ts/issues"
+    },
+    "homepage": "https://github.com/discordelia/leaflet-semicircle-ts#readme",
+    "peerDependencies": {
+        "leaflet": "1.6.0"
+    },
+    "devDependencies": {
+        "@types/leaflet": "^1.5.17",
+        "microbundle": "^0.12.3"
+    },
+    "dependencies": {}
+}
