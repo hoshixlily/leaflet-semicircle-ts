@@ -19,7 +19,6 @@ export interface SemicircleOptions extends CircleMarkerOptions {
 }
 
 export class Semicircle extends Circle {
-    private readonly semicircleOptions: SemicircleOptions = {startAngle: 0, stopAngle: 359.9999};
 
     public constructor(
         latLng: LatLngExpression = {lat: 0, lng: 0},
@@ -28,6 +27,27 @@ export class Semicircle extends Circle {
         super(latLng, options as CircleMarkerOptions);
         Object.assign(this.semicircleOptions, options);
         this.extendForSemicircle();
+        (this as any)._containsPoint = this.containsPoint.bind(this);
+    }
+
+    private readonly semicircleOptions: SemicircleOptions = {startAngle: 0, stopAngle: 359.9999};
+
+    private static normalize(angle: number): number {
+        while (angle <= -Math.PI) {
+            angle += 2.0 * Math.PI;
+        }
+        while (angle > Math.PI) {
+            angle -= 2.0 * Math.PI;
+        }
+        return angle;
+    }
+
+    private static fixAngle(angle: number): number {
+        return (angle - 90) * Math.PI / 180.0;
+    }
+
+    private static rotate(p: Point, angle: number, r: number): Point {
+        return p.add(point(Math.cos(angle), Math.sin(angle)).multiplyBy(r));
     }
 
     public getDirection(): number {
@@ -53,7 +73,12 @@ export class Semicircle extends Circle {
     }
 
     public isSemicircle(): boolean {
-        return (
+        const diff = Math.abs(this.semicircleOptions.stopAngle - this.semicircleOptions.startAngle);
+        const fullCircle = diff === 0 || diff > 359.0;
+        if (fullCircle) {
+            return false;
+        }
+        return !fullCircle || (
             !(this.semicircleOptions.startAngle === 0 && this.semicircleOptions.stopAngle > 359)
             && !(this.semicircleOptions.startAngle === this.semicircleOptions.stopAngle)
         );
@@ -61,8 +86,12 @@ export class Semicircle extends Circle {
 
     public setDirection(direction: number, degrees: number): this {
         degrees = degrees ?? 10;
-        this.semicircleOptions.startAngle = direction - (degrees / 2);
-        this.semicircleOptions.stopAngle = direction + (degrees / 2);
+        if (degrees >= 360) {
+            this.setStopAngle(360);
+        } else {
+            this.semicircleOptions.startAngle = direction - (degrees / 2);
+            this.semicircleOptions.stopAngle = direction + (degrees / 2);
+        }
         return this.redraw();
     }
 
@@ -77,12 +106,20 @@ export class Semicircle extends Circle {
     }
 
     private extendForSemicircle(): void {
-        const updateSVGCircle = (SVG.prototype as any)._updateCircle;
-        const updateCanvasCircle = (Canvas.prototype as any)._updateCircle;
         SVG.include({
-            _updateCircle(layer) {
+            _updateCircle(layer): any {
                 const circleLayer = layer as any;
                 const mapPoint = circleLayer._map.latLngToLayerPoint(circleLayer._latlng);
+                const updateSVGCircle = (cLayer) => { // Taken from https://github.com/Leaflet/Leaflet/blob/master/src/layer/vector/SVG.js
+                    const p = cLayer._point;
+                    const cr = Math.max(Math.round(cLayer._radius), 1);
+                    const cr2 = Math.max(Math.round(cLayer._radiusY), 1) || cr;
+                    const arc = "a" + cr + "," + cr2 + " 0 1,0 ";
+                    // drawing a circle with two half-arcs
+                    const d = cLayer._empty() ? "M0 0" :
+                        `M${p.x - cr},${p.y}${arc}${cr * 2},0 ${arc}${-cr * 2},0 `;
+                    this._setPath(cLayer, d);
+                };
 
                 if (!(layer instanceof Semicircle) || !layer.isSemicircle()) {
                     return updateSVGCircle.call(this, layer);
@@ -102,11 +139,7 @@ export class Semicircle extends Circle {
             }
         });
         Canvas.include({
-            _updateCircle(layer: Semicircle) {
-                if (!(layer instanceof Semicircle) || !layer.isSemicircle()) {
-                    return updateCanvasCircle.call(this, layer);
-                }
-
+            _updateCircle(layer: Semicircle): any {
                 const canvasThis = this as any;
                 const circleLayer = layer as any;
                 if (!canvasThis._drawing || circleLayer._empty()) {
@@ -115,6 +148,27 @@ export class Semicircle extends Circle {
 
                 const mapPoint = circleLayer._map.latLngToLayerPoint(circleLayer._latlng);
                 const ctx = canvasThis._ctx as CanvasRenderingContext2D;
+                const updateCanvasCircle = (cLayer) => {
+                    if (!this._drawing || cLayer._empty()) { return; }
+                    const p = cLayer._point;
+                    const cr = Math.max(Math.round(cLayer._radius), 1);
+                    const cs = (Math.max(Math.round(cLayer._radiusY), 1) || cr) / cr;
+                    if (cs !== 1) {
+                        ctx.save();
+                        ctx.scale(1, s);
+                    }
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y / cs, cr, 0, Math.PI * 2, false);
+                    if (cs !== 1) {
+                        ctx.restore();
+                    }
+                    this._fillStroke(ctx, cLayer);
+                };
+
+                if (!(layer instanceof Semicircle) || !layer.isSemicircle()) {
+                    updateCanvasCircle.call(this, layer);
+                    return;
+                }
 
                 const r = circleLayer._radius as number;
                 const s = (circleLayer._radius || r) / r;
@@ -137,13 +191,13 @@ export class Semicircle extends Circle {
         });
     }
 
-    private containsPoint(point: Point): boolean {
+    private containsPoint(p: Point): boolean {
         const basePoint: Point = (this as any)._point;
         const radius: number = (this as any)._radius;
-        const clickTolerance: () => number = (this as any)._clickTolerance;
-        let angle = Math.atan2(point.y - basePoint.y, point.x - basePoint.x);
-        const nStart = this.normalize(this.getStartAngle());
-        let nStop = this.normalize(this.getStopAngle());
+        const clickTolerance: () => number = (this as any)._clickTolerance.bind(this);
+        let angle = Math.atan2(p.y - basePoint.y, p.x - basePoint.x);
+        const nStart = Semicircle.normalize(this.getStartAngle());
+        let nStop = Semicircle.normalize(this.getStopAngle());
         if (nStop <= nStart) {
             nStop += 2.0 * Math.PI;
         }
@@ -151,24 +205,6 @@ export class Semicircle extends Circle {
             angle += 2.0 * Math.PI;
         }
         return nStart < angle && angle <= nStop
-            && point.distanceTo(basePoint) <= radius + clickTolerance();
-    }
-
-    private normalize(angle: number): number {
-        while (angle <= -Math.PI) {
-            angle += 2.0 * Math.PI;
-        }
-        while (angle > Math.PI) {
-            angle -= 2.0 * Math.PI;
-        }
-        return angle;
-    }
-
-    private static fixAngle(angle: number): number {
-        return (angle - 90) * Math.PI / 180.0;
-    }
-
-    private static rotate(p: Point, angle: number, r: number): Point {
-        return p.add(point(Math.cos(angle), Math.sin(angle)).multiplyBy(r));
+            && p.distanceTo(basePoint) <= radius + clickTolerance();
     }
 }

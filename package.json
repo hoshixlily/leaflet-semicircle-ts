@@ -1,7 +1,7 @@
 {
     "name": "@discordelia/leaflet-semicircle-ts",
-    "version": "1.0.2",
-    "description": "Typescript port of the semicircle extension for Leaflet library originally written by @jieter.",
+    "version": "1.0.3",
+    "description": "Typescript port of the semicircle extension for Leaflet library. Originally written by @jieter.",
     "main": "dist/index.ts",
     "module": "dist/index.esm.js",
     "types": "dist/index.d.ts",
