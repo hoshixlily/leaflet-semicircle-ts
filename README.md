@@ -1,9 +1,13 @@
 # Description
 
 Semicircle plugin for leaflet library. 
+This is the TypeScript port of the [semicircle plugin](https://github.com/jieter/Leaflet-semicircle) by developed by [@jieter](https://github.com/jieter).
 
-This is the TypeScript port of the semicircle plugin by @jieter.
+## Install
 
+````shell
+npm i @mirei/leaflet-semicircle-ts
+````
 Usage
 -----
 ```typescript

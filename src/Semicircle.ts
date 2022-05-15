@@ -1,5 +1,4 @@
 /**
- * Author: discordelia
  * Original Javascript Version: https://github.com/jieter/Leaflet-semicircle
  * Draws a semicircle to a leaflet map.
  * Usage
