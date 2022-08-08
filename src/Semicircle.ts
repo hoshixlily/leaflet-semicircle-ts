@@ -128,7 +128,7 @@ export class Semicircle extends Circle {
                 }
 
                 const r = circleLayer._radius as number;
-                const r2 = Math.round(circleLayer._radiusY || r);
+                const r2 = circleLayer._radiusY || r;
                 const start = Semicircle.rotate(mapPoint, layer.getStartAngle(), r);
                 const end = Semicircle.rotate(mapPoint, layer.getStopAngle(), r);
                 const largeArc = (layer.semicircleOptions.stopAngle - layer.semicircleOptions.startAngle >= 180) ? "1" : "0";

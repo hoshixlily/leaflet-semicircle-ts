@@ -1,6 +1,7 @@
 # Description
 
-Semicircle plugin for leaflet library. 
+Semicircle plugin for leaflet library.
+
 This is the TypeScript port of the [semicircle plugin](https://github.com/jieter/Leaflet-semicircle) by developed by [@jieter](https://github.com/jieter).
 
 ## Install
@@ -13,7 +14,7 @@ Usage
 ```typescript
 
 const options: SemicircleOptions = {
-    startaAngle: 0,
+    startAngle: 0,
     stopAngle: 120
 };
 const latLng: LatLngExpression = {

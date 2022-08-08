@@ -1,6 +1,6 @@
 {
     "name": "@mirei/leaflet-semicircle-ts",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "Typescript port of the semicircle extension for Leaflet library. Originally written by @jieter.",
     "main": "dist/index.ts",
     "module": "dist/index.esm.js",
@@ -17,14 +17,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/misamona/leaflet-semicircle-ts.git"
+        "url": "git+https://github.com/merophise/leaflet-semicircle-ts.git"
     },
     "keywords": [
         "leaflet",
         "semicircle",
         "typescript"
     ],
-    "author": "discordelia",
+    "author": "merophise",
     "license": "MIT",
     "peerDependencies": {
         "leaflet": "^1.7.1"
