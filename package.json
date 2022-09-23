@@ -1,6 +1,6 @@
 {
     "name": "@mirei/leaflet-semicircle-ts",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "Typescript port of the semicircle extension for Leaflet library. Originally written by @jieter.",
     "main": "dist/index.ts",
     "module": "dist/index.esm.js",

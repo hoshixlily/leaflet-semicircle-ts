@@ -104,6 +104,13 @@ export class Semicircle extends Circle {
         return this.redraw();
     }
 
+    public override setStyle(style: CircleMarkerOptions): this {
+        if (style.radius != null) {
+            this.setRadius(style.radius);
+        }
+        return super.setStyle(style);
+    }
+
     private extendForSemicircle(): void {
         SVG.include({
             _updateCircle(layer): any {
@@ -148,7 +155,9 @@ export class Semicircle extends Circle {
                 const mapPoint = circleLayer._map.latLngToLayerPoint(circleLayer._latlng);
                 const ctx = canvasThis._ctx as CanvasRenderingContext2D;
                 const updateCanvasCircle = (cLayer) => {
-                    if (!this._drawing || cLayer._empty()) { return; }
+                    if (!this._drawing || cLayer._empty()) {
+                        return;
+                    }
                     const p = cLayer._point;
                     const cr = Math.max(Math.round(cLayer._radius), 1);
                     const cs = (Math.max(Math.round(cLayer._radiusY), 1) || cr) / cr;
